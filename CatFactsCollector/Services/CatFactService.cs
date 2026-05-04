@@ -7,35 +7,28 @@ using CatFactsCollector.Models;
 
 namespace CatFactsCollector.Services;
 
-public class CatFactService(HttpClient httpClient, IConfiguration configuration) : ICatFactService
+public class CatFactService(HttpClient httpClient) : ICatFactService
 {
     public async Task<CatFact?> GetCatFactAsync(int? length, CancellationToken cancellationToken = default)
     {
-        var uriBuilder = new UriBuilder(configuration["BaseURL"]!);
-        uriBuilder.Path += "fact";
         var parameters = HttpUtility.ParseQueryString(string.Empty);
         
         if (length != null) parameters["max_length"] = length.ToString();
-        uriBuilder.Query = parameters.ToString();
 
-        return await GetFromApiAsync<CatFact>(uriBuilder.Uri, cancellationToken);
+        return await GetFromApiAsync<CatFact>(BuildRelativeUri("fact", parameters.ToString()), cancellationToken);
     }
 
     public async Task<CatFactsDto?> GetCatFactsAsync(int? length, int? limit, CancellationToken cancellationToken = default)
     {
-        var uriBuilder = new UriBuilder(configuration["BaseURL"]!);
-        uriBuilder.Path += "facts";
-        
         var parameters = HttpUtility.ParseQueryString(string.Empty);
         
         if (length != null) parameters["max_length"] = length.ToString();
         if (limit != null) parameters["limit"] = limit.ToString();
-        uriBuilder.Query = parameters.ToString();
 
-        return await GetFromApiAsync<CatFactsDto>(uriBuilder.Uri, cancellationToken);
+        return await GetFromApiAsync<CatFactsDto>(BuildRelativeUri("facts", parameters.ToString()), cancellationToken);
     }
 
-    private async Task<T?> GetFromApiAsync<T>(Uri uri, CancellationToken cancellationToken)
+    private async Task<T?> GetFromApiAsync<T>(string uri, CancellationToken cancellationToken)
     {
         try
         {
@@ -62,5 +55,10 @@ public class CatFactService(HttpClient httpClient, IConfiguration configuration)
         {
             throw new CatFactApiException("Cat fact API returned invalid JSON or an unexpected response format.", exception);
         }
+    }
+
+    private static string BuildRelativeUri(string path, string? query)
+    {
+        return string.IsNullOrWhiteSpace(query) ? path : $"{path}?{query}";
     }
 }
