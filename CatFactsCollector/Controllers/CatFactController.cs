@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace CatFactsCollector.Controllers;
 
 [ApiController]
-[Route("catFactController")]
+[Route("api/cat-facts")]
 public class CatFactController(ICatFactService catFactService, IFileService fileService) : ControllerBase
 {
     [HttpGet]
-    [Route("/fact")]
+    [Route("fact")]
     public async Task<IActionResult> GetCatFact(int? length)
     {
         CatFact? catFact;
@@ -33,7 +33,7 @@ public class CatFactController(ICatFactService catFactService, IFileService file
     }
 
     [HttpGet]
-    [Route("/facts")]
+    [Route("facts")]
     public async Task<IActionResult> GetCatFacts(int? length, int limit)
     {
         CatFactsDto? catFacts;
