@@ -1,5 +1,6 @@
 ﻿using System.Web;
 using CatFactsCollector.Contracts;
+using CatFactsCollector.Exceptions;
 using CatFactsCollector.Models;
 using Newtonsoft.Json;
 
@@ -7,7 +8,7 @@ namespace CatFactsCollector.Services;
 
 public class CatFactService(HttpClient httpClient, IConfiguration configuration) : ICatFactService
 {
-    public async Task<CatFact?> GetCatFactAsync(int? length)
+    public async Task<CatFact?> GetCatFactAsync(int? length, CancellationToken cancellationToken = default)
     {
         var uriBuilder = new UriBuilder(configuration["BaseURL"]!);
         uriBuilder.Path += "fact";
@@ -15,13 +16,11 @@ public class CatFactService(HttpClient httpClient, IConfiguration configuration)
         
         if (length != null) parameters["max_length"] = length.ToString();
         uriBuilder.Query = parameters.ToString();
-        
-        var response = await httpClient.GetStringAsync(uriBuilder.Uri);
-        var catFact = JsonConvert.DeserializeObject<CatFact>(response);
-        return catFact;
+
+        return await GetFromApiAsync<CatFact>(uriBuilder.Uri, cancellationToken);
     }
 
-    public async Task<CatFactsDto?> GetCatFactsAsync(int? length, int? limit)
+    public async Task<CatFactsDto?> GetCatFactsAsync(int? length, int? limit, CancellationToken cancellationToken = default)
     {
         var uriBuilder = new UriBuilder(configuration["BaseURL"]!);
         uriBuilder.Path += "facts";
@@ -31,10 +30,37 @@ public class CatFactService(HttpClient httpClient, IConfiguration configuration)
         if (length != null) parameters["max_length"] = length.ToString();
         if (limit != null) parameters["limit"] = limit.ToString();
         uriBuilder.Query = parameters.ToString();
-        
-        var response = await httpClient.GetStringAsync(uriBuilder.Uri);
-        var catFacts = JsonConvert.DeserializeObject<CatFactsDto>(response);
-        return catFacts;
+
+        return await GetFromApiAsync<CatFactsDto>(uriBuilder.Uri, cancellationToken);
     }
-    
+
+    private async Task<T?> GetFromApiAsync<T>(Uri uri, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var response = await httpClient.GetAsync(uri, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new CatFactApiException(
+                    $"Cat fact API returned {(int)response.StatusCode} {response.ReasonPhrase}.",
+                    response.StatusCode);
+            }
+
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            return JsonConvert.DeserializeObject<T>(responseBody);
+        }
+        catch (TaskCanceledException exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new CatFactApiException("Cat fact API request timed out.", exception);
+        }
+        catch (HttpRequestException exception)
+        {
+            throw new CatFactApiException("Cat fact API request failed.", exception);
+        }
+        catch (JsonException exception)
+        {
+            throw new CatFactApiException("Cat fact API returned invalid JSON.", exception);
+        }
+    }
 }
