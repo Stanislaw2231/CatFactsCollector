@@ -4,7 +4,6 @@ namespace CatFactsCollector.Contracts;
 
 public interface IFileService
 {
-    void AppendToFile(CatFact fact);
-    void AppendToFile(CatFactsDto facts);
-
+    Task AppendToFileAsync(CatFact fact, CancellationToken cancellationToken = default);
+    Task AppendToFileAsync(CatFactsDto facts, CancellationToken cancellationToken = default);
 }

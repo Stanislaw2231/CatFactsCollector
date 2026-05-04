@@ -28,7 +28,7 @@ public class CatFactController(ICatFactService catFactService, IFileService file
         }
 
         if (catFact == null) return NotFound();
-        fileService.AppendToFile(catFact);
+        await fileService.AppendToFileAsync(catFact, HttpContext.RequestAborted);
         return Ok(catFact);
     }
 
@@ -54,7 +54,7 @@ public class CatFactController(ICatFactService catFactService, IFileService file
         }
 
         if (catFacts == null) return NotFound();
-        fileService.AppendToFile(catFacts);
+        await fileService.AppendToFileAsync(catFacts, HttpContext.RequestAborted);
         return Ok(catFacts);
     }
 }

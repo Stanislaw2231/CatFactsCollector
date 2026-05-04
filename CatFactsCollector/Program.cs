@@ -12,7 +12,7 @@ public class Program
         // Add services to the container.
         builder.Services.AddAuthorization();
         builder.Services.AddControllers();
-        builder.Services.AddScoped<IFileService, FileService>();
+        builder.Services.AddSingleton<IFileService, FileService>();
 
         var config = builder.Configuration;
         var filePath = config["FilePath"];
