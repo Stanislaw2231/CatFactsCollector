@@ -1,8 +1,9 @@
-﻿using System.Web;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
+using System.Web;
 using CatFactsCollector.Contracts;
 using CatFactsCollector.Exceptions;
 using CatFactsCollector.Models;
-using Newtonsoft.Json;
 
 namespace CatFactsCollector.Services;
 
@@ -47,8 +48,7 @@ public class CatFactService(HttpClient httpClient, IConfiguration configuration)
                     response.StatusCode);
             }
 
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-            return JsonConvert.DeserializeObject<T>(responseBody);
+            return await response.Content.ReadFromJsonAsync<T>(cancellationToken);
         }
         catch (TaskCanceledException exception) when (!cancellationToken.IsCancellationRequested)
         {
@@ -60,7 +60,7 @@ public class CatFactService(HttpClient httpClient, IConfiguration configuration)
         }
         catch (JsonException exception)
         {
-            throw new CatFactApiException("Cat fact API returned invalid JSON.", exception);
+            throw new CatFactApiException("Cat fact API returned invalid JSON or an unexpected response format.", exception);
         }
     }
 }

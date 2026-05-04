@@ -8,5 +8,5 @@ public class CatFact
     public string? Fact { get; set; }
     
     [JsonPropertyName("length")]
-    public string? Length { get; set; }
+    public int Length { get; set; }
 }

@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace CatFactsCollector.Models;
 
 public class CatFactsDto
 {
-    [JsonProperty("data")] public List<CatFact>? Facts { get; set; }
+    [JsonPropertyName("data")]
+    public List<CatFact>? Facts { get; set; }
 }
