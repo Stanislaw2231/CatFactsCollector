@@ -2,8 +2,8 @@
 
 namespace CatFactsCollector.Models;
 
-public class CatFactsDto
+public record CatFactsDto
 {
     [JsonPropertyName("data")]
-    public List<CatFact>? Facts { get; set; }
+    public IReadOnlyList<CatFact>? Facts { get; init; }
 }

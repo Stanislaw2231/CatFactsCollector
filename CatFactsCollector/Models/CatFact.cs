@@ -2,11 +2,11 @@
 
 namespace CatFactsCollector.Models;
 
-public class CatFact
+public record CatFact
 {
     [JsonPropertyName("fact")]
-    public string? Fact { get; set; }
+    public string? Fact { get; init; }
     
     [JsonPropertyName("length")]
-    public int Length { get; set; }
+    public int Length { get; init; }
 }
