@@ -11,13 +11,13 @@ public class CatFactController(ICatFactService catFactService, IFileService file
 {
     [HttpGet]
     [Route("fact")]
-    public async Task<IActionResult> GetCatFact(int? length)
+    public async Task<IActionResult> GetCatFact([FromQuery] GetCatFactRequest request)
     {
         CatFact? catFact;
 
         try
         {
-            catFact = await catFactService.GetCatFactAsync(length, HttpContext.RequestAborted);
+            catFact = await catFactService.GetCatFactAsync(request.Length, HttpContext.RequestAborted);
         }
         catch (CatFactApiException exception)
         {
@@ -34,13 +34,16 @@ public class CatFactController(ICatFactService catFactService, IFileService file
 
     [HttpGet]
     [Route("facts")]
-    public async Task<IActionResult> GetCatFacts(int? length, int limit)
+    public async Task<IActionResult> GetCatFacts([FromQuery] GetCatFactsRequest request)
     {
         CatFactsDto? catFacts;
 
         try
         {
-            catFacts = await catFactService.GetCatFactsAsync(length, limit, HttpContext.RequestAborted);
+            catFacts = await catFactService.GetCatFactsAsync(
+                request.Length,
+                request.Limit,
+                HttpContext.RequestAborted);
         }
         catch (CatFactApiException exception)
         {
