@@ -29,7 +29,7 @@ public class CatFactService(HttpClient httpClient, IConfiguration configuration)
         var parameters = HttpUtility.ParseQueryString(string.Empty);
         
         if (length != null) parameters["max_length"] = length.ToString();
-        if (length != null) parameters["limit"] = limit.ToString();
+        if (limit != null) parameters["limit"] = limit.ToString();
         uriBuilder.Query = parameters.ToString();
         
         var response = await httpClient.GetStringAsync(uriBuilder.Uri);
